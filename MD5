@@ -1,9 +1,9 @@
-6f0e61255337fe927b9976c2c55d04a0 *DESCRIPTION
+c5d2b45107ecb74d00d6bcecd7854be4 *DESCRIPTION
 50e79731ece0fca8f185804e891a8b6d *NAMESPACE
 7232bf03fd6f5be8746512794b5d3ab3 *R/cpp11.R
 d71f770b8e61c77b9bd4f06a33b9528f *R/supercells-package.R
 ae16b110de4dbe500a02e7bd117ab867 *R/supercells.R
-22230e3e5775f1910bab6bafc7857043 *README.md
+2462f1626be415076141066e8d1e84d3 *README.md
 c32f36ae49eae8c98fabf4f184cbb2f2 *inst/CITATION
 03510dab675bbafa3f77b172fe5b4473 *inst/raster/ortho.tif
 df3ef63f8522bba10d591764007734bb *inst/raster/volcano.tif
@@ -24,7 +24,7 @@ ac08cc2e68c2c787afb0142ee501f713 *src/cpp11.cpp
 f6ee13852baa78ed5ddd194552d81964 *src/dtw/LICENSE
 878966111271a234acddf868e899f78e *src/dtw/README.md
 8bc6d9587f5b4c51e1c98b9b18bbe778 *src/dtw/include/DTW.hpp
-a7af2e2afe6abeca306256e6db38eb4c *src/slic.cpp
+8be71589d482d98ef27d52a4ff21251e *src/slic.cpp
 60cdb92c19f9aa8f651334641ffbb094 *src/slic.h
 b5aed92df5b7a000718a0221ffb3a253 *tests/testthat.R
 f43a5d175f1882517f42712e34962de9 *tests/testthat/test-supercells-chunks.R

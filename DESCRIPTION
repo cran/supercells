@@ -1,6 +1,6 @@
 Package: supercells
 Title: Superpixels of Spatial Data
-Version: 0.8.0
+Version: 0.8.2
 Authors@R: c(
     person(given = "Jakub", family = "Nowosad", 
     role = c("aut", "cre"),
@@ -26,11 +26,11 @@ BugReports: https://github.com/Nowosad/supercells/issues
 Suggests: knitr, covr, testthat (>= 3.0.0), rmarkdown, stars
 Config/testthat/edition: 3
 NeedsCompilation: yes
-Packaged: 2022-02-15 19:04:25 UTC; jn
+Packaged: 2022-03-05 08:40:05 UTC; jn
 Author: Jakub Nowosad [aut, cre] (<https://orcid.org/0000-0002-1057-3721>),
   Pascal Mettes [ctb] (Author of the initial C++ implementation of the
     SLIC Superpixel algorithm for image data),
   Charles Jekel [ctb] (Author of underlying C++ code for dtw)
 Maintainer: Jakub Nowosad <nowosad.jakub@gmail.com>
 Repository: CRAN
-Date/Publication: 2022-02-16 20:00:01 UTC
+Date/Publication: 2022-03-08 13:10:02 UTC
