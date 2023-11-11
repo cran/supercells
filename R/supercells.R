@@ -17,7 +17,8 @@
 #' By default, when `clean = TRUE`, average area (A) is calculated based on the total number of cells divided by a number of supercells
 #' Next, the minimal size of a supercell equals to A/(2^2) (A is being right shifted)
 #' @param step The distance (number of cells) between initial supercells' centers. You can use either `k` or `step`.
-#' @param transform Transformation to be performed on the input. Currently implemented is "to_LAB" allowing to convert RGB raster to a raster in the LAB color space. By default, no transformation is performed. (This argument is experimental and may be removed in the future).
+#' @param transform Transformation to be performed on the input. By default, no transformation is performed. Currently available transformation is "to_LAB": first, the conversion from RGB to the LAB color space is applied, then the supercells algorithm is run, and afterward, a reverse transformation is performed on the obtained results. (This argument is experimental and may be removed in the future).
+#' @param metadata Logical. If `TRUE`, the output object will have metadata columns ("supercells", "x", "y"). If `FALSE`, the output object will not have metadata columns.
 #' @param chunks Should the input (`x`) be split into chunks before deriving supercells? Either `FALSE` (default), `TRUE` (only large input objects are split), or a numeric value (representing the side length of the chunk in the number of cells).
 #' @param future Should the future package be used for parallelization of the calculations? Default: `FALSE`. If `TRUE`, you also need to specify `future::plan()`.
 #' @param verbose An integer specifying the level of text messages printed during calculations. 0 means no messages (default), 1 provides basic messages (e.g., calculation stage).
@@ -30,32 +31,30 @@
 #'
 #' @examples
 #' library(supercells)
-#' library(terra)
-#' library(sf)
 #' # One variable
 #'
-#' vol = rast(system.file("raster/volcano.tif", package = "supercells"))
+#' vol = terra::rast(system.file("raster/volcano.tif", package = "supercells"))
 #' vol_slic1 = supercells(vol, k = 50, compactness = 1)
-#' plot(vol)
-#' plot(st_geometry(vol_slic1), add = TRUE, lwd = 0.2)
+#' terra::plot(vol)
+#' plot(sf::st_geometry(vol_slic1), add = TRUE, lwd = 0.2)
 #'
 #' # RGB variables
-#' # ortho = rast(system.file("raster/ortho.tif", package = "supercells"))
+#' # ortho = terra::rast(system.file("raster/ortho.tif", package = "supercells"))
 #' # ortho_slic1 = supercells(ortho, k = 1000, compactness = 10, transform = "to_LAB")
-#' # plot(ortho)
-#' # plot(st_geometry(ortho_slic1), add = TRUE)
+#' # terra::plot(ortho)
+#' # plot(sf::st_geometry(ortho_slic1), add = TRUE)
 #' #
 #' # ### RGB variables - colored output
 #' #
 #' # rgb_to_hex = function(x){
 #' #   apply(t(x), 2, function(x) rgb(x[1], x[2], x[3], maxColorValue = 255))
 #' # }
-#' # avg_colors = rgb_to_hex(st_drop_geometry(ortho_slic1[4:6]))
+#' # avg_colors = rgb_to_hex(sf::st_drop_geometry(ortho_slic1[4:6]))
 #' #
-#' # plot(ortho)
-#' # plot(st_geometry(ortho_slic1), add = TRUE, col = avg_colors)
+#' # terra::plot(ortho)
+#' # plot(sf::st_geometry(ortho_slic1), add = TRUE, col = avg_colors)
 supercells = function(x, k, compactness, dist_fun = "euclidean", avg_fun = "mean", clean = TRUE,
-                      iter = 10, transform = NULL, step, minarea, chunks = FALSE, future = FALSE, verbose = 0){
+                      iter = 10, transform = NULL, step, minarea, metadata = TRUE, chunks = FALSE, future = FALSE, verbose = 0){
   if (!inherits(x, "SpatRaster")){
     if (inherits(x, "stars")){
       x = terra::rast(x)
@@ -126,6 +125,9 @@ supercells = function(x, k, compactness, dist_fun = "euclidean", avg_fun = "mean
 
   # combine
   slic_sf = update_supercells_ids(slic_sf)
+  if (isFALSE(metadata)){
+    slic_sf = slic_sf[, -which(names(slic_sf) %in% c("supercells", "x", "y"))]
+  }
   return(slic_sf)
 }
 
@@ -141,7 +143,7 @@ run_slic_chunks = function(ext, x, step, compactness, dist_type,
   ext_x = terra::ext(x)
   mat = dim(x)[1:2]
   mode(mat) = "integer"
-  vals = as.matrix(terra::as.data.frame(x, cell = FALSE, na.rm = FALSE))
+  vals = as.matrix(terra::as.data.frame(x, cells = FALSE, na.rm = FALSE))
   mode(vals) = "double"
 
   if (!is.null(transform)){
@@ -167,6 +169,7 @@ run_slic_chunks = function(ext, x, step, compactness, dist_type,
       slic[[3]] = grDevices::convertColor(slic[[3]], from = "Lab", to = "sRGB") * 255
     }
   }
+  if (nrow(slic[[2]]) == 0 || all(slic[[2]] == 0)) stop("I cannot return supercells. This may be due to a large number of missing values in the 'x' object. Try to either trim your data to the non-NA area (e.g., with 'terra::trim()') or increase the number of expected supercells.", call. = FALSE)
   slic_sf = terra::rast(slic[[1]])
   terra::NAflag(slic_sf) = -1
   terra::crs(slic_sf) = terra::crs(x)

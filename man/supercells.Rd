@@ -15,6 +15,7 @@ supercells(
   transform = NULL,
   step,
   minarea,
+  metadata = TRUE,
   chunks = FALSE,
   future = FALSE,
   verbose = 0
@@ -39,13 +40,15 @@ It accepts any fitting R function (e.g., \code{base::mean()} or \code{stats::med
 
 \item{iter}{The number of iterations performed to create the output.}
 
-\item{transform}{Transformation to be performed on the input. Currently implemented is "to_LAB" allowing to convert RGB raster to a raster in the LAB color space. By default, no transformation is performed. (This argument is experimental and may be removed in the future).}
+\item{transform}{Transformation to be performed on the input. By default, no transformation is performed. Currently available transformation is "to_LAB": first, the conversion from RGB to the LAB color space is applied, then the supercells algorithm is run, and afterward, a reverse transformation is performed on the obtained results. (This argument is experimental and may be removed in the future).}
 
 \item{step}{The distance (number of cells) between initial supercells' centers. You can use either \code{k} or \code{step}.}
 
 \item{minarea}{Specifies the minimal size of a supercell (in cells). Only works when \code{clean = TRUE}.
 By default, when \code{clean = TRUE}, average area (A) is calculated based on the total number of cells divided by a number of supercells
 Next, the minimal size of a supercell equals to A/(2^2) (A is being right shifted)}
+
+\item{metadata}{Logical. If \code{TRUE}, the output object will have metadata columns ("supercells", "x", "y"). If \code{FALSE}, the output object will not have metadata columns.}
 
 \item{chunks}{Should the input (\code{x}) be split into chunks before deriving supercells? Either \code{FALSE} (default), \code{TRUE} (only large input objects are split), or a numeric value (representing the side length of the chunk in the number of cells).}
 
@@ -61,30 +64,28 @@ Creates supercells based on single- or multi-band spatial raster data. It uses a
 }
 \examples{
 library(supercells)
-library(terra)
-library(sf)
 # One variable
 
-vol = rast(system.file("raster/volcano.tif", package = "supercells"))
+vol = terra::rast(system.file("raster/volcano.tif", package = "supercells"))
 vol_slic1 = supercells(vol, k = 50, compactness = 1)
-plot(vol)
-plot(st_geometry(vol_slic1), add = TRUE, lwd = 0.2)
+terra::plot(vol)
+plot(sf::st_geometry(vol_slic1), add = TRUE, lwd = 0.2)
 
 # RGB variables
-# ortho = rast(system.file("raster/ortho.tif", package = "supercells"))
+# ortho = terra::rast(system.file("raster/ortho.tif", package = "supercells"))
 # ortho_slic1 = supercells(ortho, k = 1000, compactness = 10, transform = "to_LAB")
-# plot(ortho)
-# plot(st_geometry(ortho_slic1), add = TRUE)
+# terra::plot(ortho)
+# plot(sf::st_geometry(ortho_slic1), add = TRUE)
 #
 # ### RGB variables - colored output
 #
 # rgb_to_hex = function(x){
 #   apply(t(x), 2, function(x) rgb(x[1], x[2], x[3], maxColorValue = 255))
 # }
-# avg_colors = rgb_to_hex(st_drop_geometry(ortho_slic1[4:6]))
+# avg_colors = rgb_to_hex(sf::st_drop_geometry(ortho_slic1[4:6]))
 #
-# plot(ortho)
-# plot(st_geometry(ortho_slic1), add = TRUE, col = avg_colors)
+# terra::plot(ortho)
+# plot(sf::st_geometry(ortho_slic1), add = TRUE, col = avg_colors)
 }
 \references{
 Achanta, R., Shaji, A., Smith, K., Lucchi, A., Fua, P., & Süsstrunk, S. (2012). SLIC Superpixels Compared to State-of-the-Art Superpixel Methods. IEEE Transactions on Pattern Analysis and Machine Intelligence, 34(11), 2274–2282. https://doi.org/10.1109/tpami.2012.120
